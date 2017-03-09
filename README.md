@@ -3,10 +3,9 @@ client sends 5 pockets to server: the first one is normal pocket and other four 
 server check the pockets and sends back ACK pocket or different REJECT pockets.
 
 <h2>ACK timeout test:</h2> 
-Do not run the server, client begins to send packets to the server. The client will try to resend 3 times if the server does not respond ack
-message for 3 seconds. After 3 times trying, the client prints out: "Server does not respond".
+Do not run the server, client begins to send packets to the server. The client will try to resend 3 times if the server does not respond ack message for 3 seconds. After 3 times trying, the client prints out: "Server does not respond".
 	
-d<h2><h2>sdsdfsdfi<>  
+ <h2 color ="red">Error packet test:</h2>
 	0xFFF4: reject out of sequence
   Client sends packet number 1 first, and then send packet number 5.dfd
 	
