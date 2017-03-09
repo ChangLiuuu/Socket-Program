@@ -1,41 +1,71 @@
 # Socket-Program (UDP)
-client sends 5 pockets to server: the first one is normal pocket and other four pockets have different errors.
-server check the pockets and sends back ACK pocket or different REJECT pockets.
+client sends 5 packets to server: the first one is normal pocket and other four pockets have different errors.
 
-<h2>ACK timeout test:</h2> 
-Do not run the server, client begins to send packets to the server. The client will try to resend 3 times if the server does not respond ack message for 3 seconds. After 3 times trying, the client prints out: "Server does not respond".
+server check each five packet and show details of data packet: 
+
+listener: got packet from 127.0.0.1
+listener: packet is 11 bytes long
+This is packet number 4 
+start "0XFFFF"
+client Id "0X1"
+packet type "0XFFF1"
+segment number "4"
+expected segment number "2"
+pre segment number "1"
+length of payload "5"
+expected length of payload "5"
+Payload: "Hello"
+Packet Ending  "0XFFFF"
+Packet is out of sequence.
+
+then server sends back ACK pocket or different REJECT pockets with different reject sub codes.
+
+<h2>timeout test:</h2> 
+When sending first packet, do not start the server. The client will start to wait for server's response for 3 seconds. if server has no response after 3 secs, client resend packet again. After 3 times of no responses, client exits:
+
+Enter your payload:
+Hello
+This is a normal pocket!
+Packet 1 . No response 1 time
+Packet 1 . No response 2 time
+Packet 1 . No response 3 time
+No server response.
 	
- <h2>Error packet test:</h2>
- 
-	0xFFF4: reject out of sequence
-  Client sends packet number 1 first, and then send packet number 5.dfd
-	
-	0xFFF5: reject length mismatch
-  Client sends packet with wrong packet length.
+<h2>five packets' test cases</h2>
 
-	0xFFF6: End of packet missing
-  Client sends packet without end of packet 0xFFFF.
+The first packet client sent is a normal packet without error, and server sends back ACK packtype: 0XFFF2. The other four packets with different errors and server send back corresponding REJECT sub code:
 
-		
-	0xFFF7: duplicate packet(same sequence number with the last packet)
-	Client sends packet number 1 first, and then send packet number 1 again.
+/*
+0XFFF4: Packet out of sequence. 
+0XFFF5 : Packet length does not match. 
+0XFFF6: End of packet lost. 
+0XFFF7: Duplicate packet. 
+**/
 
-<h2>Testing cases</h2>
+Enter your payload:
+a
+This is a normal pocket!
+From receving packet's type: "0XFFF2"
+Enter your payload:
+s
+send a out-of-sequence pocket!
+From receving packet's type: "0XFFF3"
+Reject Error: Packet out of sequence. 0XFFF4 
 
- a. Ack timeout
-    Run the client2 program only.
+Enter your payload:
+d
+This is a wrong payload length pocket!
+From receving packet's type: "0XFFF3"
+Reject Error: Packet length does not match. 0XFFF5 
 
- b. Subscriber permitted to access the network.
-    Run the server2 program first;
-    Run the client2 program;
-    Input the subscriber number on the database which has paid.
+Enter your payload:
+f
+This is a end-lost pocket!
+From receving packet's type: "0XFFF3"
+Reject Error: End of packet lost. 0XFFF6 
 
- c. Subscriber does not exist on the database.
-   Run the server2 program first;
-   Run the client2 program;
-   Input the subscriber number does not exist on the database.
-
- d. Subscriber has not paid.
-   Run the server2 program first;
-   Run the client2 program;
-   Input the subscriber number on the database which has not paid.
+Enter your payload:
+g
+This is a duplicated pocket.
+From receving packet's type: "0XFFF3"
+Reject Error: Duplicate packet. 0XFFF7 
