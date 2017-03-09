@@ -5,7 +5,8 @@ server check the pockets and sends back ACK pocket or different REJECT pockets.
 <h2>ACK timeout test:</h2> 
 Do not run the server, client begins to send packets to the server. The client will try to resend 3 times if the server does not respond ack message for 3 seconds. After 3 times trying, the client prints out: "Server does not respond".
 	
- <h2 color ="red">Error packet test:</h2>
+ <h2>Error packet test:</h2>
+ 
 	0xFFF4: reject out of sequence
   Client sends packet number 1 first, and then send packet number 5.dfd
 	
@@ -19,12 +20,8 @@ Do not run the server, client begins to send packets to the server. The client w
 	0xFFF7: duplicate packet(same sequence number with the last packet)
 	Client sends packet number 1 first, and then send packet number 1 again.
 
-2 Compile command
-	gcc -o client2 client2.c
-	gcc -o server2 server2.c
+<h2>Testing cases</h2>
 
-
-4 Testing cases
  a. Ack timeout
     Run the client2 program only.
 
