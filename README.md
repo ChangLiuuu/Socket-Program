@@ -1,4 +1,4 @@
-# Socket-Program
+# Socket-Program (UDP)
 client sends 5 pockets to server: the first one is normal pocket and other four pockets have different errors.
 server check the pockets and sends back ACK pocket or different REJECT pockets.
 
