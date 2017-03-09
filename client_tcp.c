@@ -13,12 +13,12 @@
 #include <sys/socket.h>
 
 #define PORT 1234
-#define REMOTE_IP "172.20.200.77"
-#define BUFFER_SIZE 1024
+#define REMOTE_IP "127.0.0.1"
+#define BUFFER_SIZE 264
 int main(){
     char packet1[BUFFER_SIZE];
     int inputLen;
-    int socket_client = socket(AF_INET, SOCK_STREAM, 0);
+    int socket_client = socket(AF_INET, SOCK_DGRAM, 0);
     struct sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;  //vip 4
     serv_addr.sin_addr.s_addr = inet_addr(REMOTE_IP);
@@ -31,6 +31,8 @@ int main(){
     printf("Success to connect.");
     
     // input
+    int startId = 0XFFFF;
+    printf(startId);
     while (1) {
         if ((packet1[inputLen++] = getchar()) == '\n') {
             break;

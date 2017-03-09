@@ -25,7 +25,7 @@ int main () {
      */
     
     int domain = AF_INET;  //ipv 4
-    int type = SOCK_STREAM; //socket type
+    int type = SOCK_DGRAM; //socket type
     int protocol = 0; //default protol
     int socket_server = socket(domain, type, protocol); // create a socket filedescriptor
     
@@ -88,6 +88,7 @@ int main () {
         
     /*read data from client side*/
     char recv_buf[264];
+
     while (1) {
         // ssize_t read(int fd, void *buf, size_t count);
         result = read(connfd, recv_buf, sizeof(recv_buf));
