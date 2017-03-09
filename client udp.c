@@ -1,6 +1,7 @@
-/*
-** client.c -- a datagram "client" demo
-*/
+
+// Created by Chang Liu on 2/23/17.
+
+//client.c
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +24,7 @@
 
 //The first 7 bytes of the packet
 struct packet {
-
+    
     unsigned short int start;
     unsigned short int client_id:8;
     unsigned short int type;
@@ -71,27 +72,27 @@ void send_error3();
 void send_error4();
 
 int main() {
-
+    
     int rv;
     int numbytes;
     int packet_num = 0;
     struct timeval timeout;
     int count;
     int code;
-
+    
     timeout.tv_sec = 3;
     timeout.tv_usec = 0;
-
-
+    
+    
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
-
+    
     if ((rv = getaddrinfo(HOST, SERVERPORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
-
+    
     // loop through all the results and make a socket
     for (p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
@@ -100,16 +101,16 @@ int main() {
         }
         break;
     }
-
+    
     if (p == NULL) {
         fprintf(stderr, "talker: failed to create socket\n");
-
+        
         return 2;
     }
-
+    
     //Set Recv timer
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *) &timeout, sizeof(timeout));
-
+    
     // Send
     for (packet_num = 0; packet_num < PACKET_NUM; packet_num++) {
         printf("Enter your payload:\n");
@@ -117,16 +118,16 @@ int main() {
         gets(payload);
         send_buf.type = 0XFFF1;
         send_buf.length = strlen(payload);
-
+        
         if (packet_num == 0) send_normal();
         else if (packet_num == 1) send_error1();
         else if (packet_num == 2) send_error2();
         else if (packet_num == 3) send_error3();
         else if (packet_num == 4) send_error4();
-
-
+        
+        
         rv = recvfrom(sockfd, recieving, BUF_SIZE - 1, MSG_WAITALL, p->ai_addr, &p->ai_addrlen);
-
+        
         //Time out
         count = 0;
         while (rv == -1) {
@@ -139,34 +140,36 @@ int main() {
             rv = recvfrom(sockfd, recieving, BUF_SIZE - 1, MSG_WAITALL, p->ai_addr, &p->ai_addrlen);
             if (rv > 0) break;
             sendto(sockfd, buffer, sizeof(send_buf) + strlen(payload) + 2, 0, p->ai_addr, p->ai_addrlen);
-
+            
         }
-        //only copy the front part 5 bytes
+        //only copy the first 5 bytes
         memcpy(&send_buf, recieving, 5);
         printf("From receving packet's type: \"%#X\"\n", send_buf.type);
+        
+        //if rej_packet, set rej_packet error code separately.
         if (send_buf.type == 0xFFF3) {
-            //copy
+            
             memcpy(&rej_packet, recieving, sizeof(rej_packet));
-
+            
             if (rej_packet.code == 0xFFF4)
                 printf("Reject Error: Packet out of sequence. %#X \n\n", rej_packet.code);
-
+            
             else if (rej_packet.code == 0xFFF5)
                 printf("Reject Error: Packet length does not match. %#X \n\n", rej_packet.code);
-
+            
             else if (rej_packet.code == 0xFFF6)
                 printf("Reject Error: End of packet lost. %#X \n\n", rej_packet.code);
-
+            
             else if (rej_packet.code == 0xFFF7)
                 printf("Reject Error: Duplicate packet. %#X \n\n", rej_packet.code);
-
+            
         }
-
+        
     }
-
+    
     freeaddrinfo(servinfo);
     close(sockfd);
-
+    
     return 0;
 }
 
@@ -185,7 +188,7 @@ void send_normal() {
 //packet number is out of sequence
 void send_error1() {
     printf("send a out-of-sequence pocket!\n");
-    send_buf.segment_no = 5;
+    send_buf.segment_no = 4;
     memset(buffer, 0, BUF_SIZE);
     memcpy(buffer, &send_buf, sizeof(send_buf));
     memcpy(buffer + sizeof(send_buf), payload, strlen(payload));
@@ -197,7 +200,7 @@ void send_error1() {
 void send_error2() {
     printf("This is a wrong payload length pocket!\n");
     send_buf.segment_no = 3;
-    send_buf.length = 0x33;
+    send_buf.length = 0xFFF3;
     memset(buffer, 0, BUF_SIZE);
     memcpy(buffer, &send_buf, sizeof(send_buf));
     memcpy(buffer + sizeof(send_buf), payload, strlen(payload));
@@ -213,8 +216,8 @@ void send_error3() {
     memset(buffer, 0, BUF_SIZE);
     memcpy(buffer, &send_buf, sizeof(send_buf));
     memcpy(buffer + sizeof(send_buf), payload, strlen(payload));
-//  memcpy(buffer + sizeof(send_buf) + strlen(payload), &end, 2);
-    sendto(sockfd, buffer, sizeof(send_buf) + strlen(payload), 0, p->ai_addr, p->ai_addrlen);
+    //  memcpy(buffer + sizeof(send_buf) + strlen(payload), &end, 2);
+    sendto(sockfd, buffer, sizeof(send_buf) + strlen(payload) + 2, 0, p->ai_addr, p->ai_addrlen);
 }
 
 //duplicated number
@@ -226,7 +229,7 @@ void send_error4() {
     memcpy(buffer + sizeof(send_buf), payload, strlen(payload));
     memcpy(buffer + sizeof(send_buf) + strlen(payload), &end, 2);
     sendto(sockfd, buffer, sizeof(send_buf) + strlen(payload) + 2, 0, p->ai_addr, p->ai_addrlen);
-
+    
 }
 
 

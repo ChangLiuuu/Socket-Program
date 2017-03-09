@@ -1,6 +1,7 @@
-/*
-** server.c -- a datagram sockets "server" demo
-*/
+
+// Created by Chang Liu on 2/23/17.
+
+//client.c
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,7 @@
 #define MAXBUFLEN 300
 #define PACKET_NUM 5
 
-//Error ACK packet
+//REJECT packet
 struct reject_packet {
     unsigned short int start;
     unsigned short int client_id:8;
@@ -28,16 +29,16 @@ struct reject_packet {
 } reject_packet = {0xFFFF, 0x0, 0xFFF3, 0x0, 0x0, 0xFFFF};
 
 
-//The first 7 bytes of the packet
+//First 7 bytes of the packet
 struct packet {
     unsigned short int start;
     unsigned short int client_id:8;
-    unsigned short int type;
+    unsigned short int packet_type;
     unsigned short int segment_no:8;
     unsigned short int length:8;
 } rec_buf = {0x0, 0x0, 0x0, 0x0, 0x00};
 
-//The ending 2 bytes of the packet
+//End 2 bytes of the packet
 struct endsign {
     unsigned short int end;
 } end = {0x0};
@@ -59,11 +60,9 @@ void *get_in_addr(struct sockaddr *sa) {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in *) sa)->sin_addr);
     }
-
+    
     return &(((struct sockaddr_in6 *) sa)->sin6_addr);
 }
-
-void recieving(int);
 
 int main(void) {
     int sockfd;
@@ -71,85 +70,80 @@ int main(void) {
     int rv;
     struct sockaddr_storage their_addr;
     int packet_num;
-    int pre_segment_no;
+    int pre_segment_no = -1;
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET; // set to AF_INET to force IPv4
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
-
+    
     if ((rv = getaddrinfo(NULL, MYPORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return -1;
     }
-
+    
     // loop through all the results and bind to the first we can
     for (p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                              p->ai_protocol)) == -1) {
-            perror("listener: socket");
+            perror("Server failed to bind socket.\n");
             continue;
         }
-
+        
         if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
             close(sockfd);
-            perror("listener: bind");
+            perror("Server failed to bind.\n");
             continue;
         }
         break;
     }
-
+    
     if (p == NULL) {
-        fprintf(stderr, "listener: failed to bind socket\n");
+        fprintf(stderr, "Server failed to bind socket.\n");
         return 2;
     }
-
+    
     freeaddrinfo(servinfo);
-    printf("server is ready to receive...\n");
+    printf("Server is ready to receive...\n");
     addr_len = sizeof their_addr;
-
+    
     for (packet_num = 0; packet_num < PACKET_NUM; packet_num++) {
-
         int rec;
         bzero(recive_buffer, MAXBUFLEN);
         bzero(payload, 256);
         memset(&rec_buf, 0, sizeof(rec_buf));
         //receive from client
         rec = recvfrom(sockfd, recive_buffer, MAXBUFLEN - 1, 0, (struct sockaddr *) &their_addr, &addr_len);
-
+        
         if (rec == -1) {
-            perror("recvfrom error!\n");
+            perror("Failed to receive!\n");
             exit(1);
         }
-
+        //copy the first 7 bytes into address of rec_buf.
         memcpy(&rec_buf, recive_buffer, sizeof(rec_buf));
+        //get the payload
         memcpy(payload, recive_buffer + sizeof(rec_buf), rec - sizeof(rec_buf) - 2);
         payload[strlen(payload)] = '\0';
+        //get the end
         memcpy(&end, recive_buffer + rec - 2, 2);
-
+        //check and show each parts
         printf("listener: got packet from %s\n", inet_ntop(their_addr.ss_family,
                                                            get_in_addr((struct sockaddr *) &their_addr), s, sizeof s));
         printf("listener: packet is %d bytes long\n", rec);
         printf("This is packet number %d \n", rec_buf.segment_no);
         printf("start \"%#X\"\n", rec_buf.start);
         printf("client Id \"%#X\"\n", rec_buf.client_id);
-        printf("packet type \"%#X\"\n", rec_buf.type);
+        printf("packet type \"%#X\"\n", rec_buf.packet_type);
         printf("segment number \"%d\"\n", rec_buf.segment_no);
         printf("expected segment number \"%d\"\n", packet_num + 1);
+        printf("pre segment number \"%d\"\n", pre_segment_no);
         printf("length of payload \"%lu\"\n", rec_buf.length);
         printf("expected length of payload \"%hu\"\n", strlen(payload));
         printf("Payload: \"%s\"\n", payload);
         printf("Packet Ending  \"%#X\"\n", end.end);
-
-        //ACK sending
+        
+        //complete other parts of REJECT packet or ACK packet, and send ACK or REJECT packets to client.
         bzero(recive_buffer, MAXBUFLEN);
-
-        if (rec_buf.length != strlen(payload)) {
-            printf("Packet has a wrong payload length.\n\n");
-            reject_packet.code = 0xFFF5;
-            reject_packet.client_id = rec_buf.client_id;
-            reject_packet.segment_no = rec_buf.segment_no;
-            memcpy(recive_buffer, &reject_packet, sizeof(reject_packet));
-        } else if (end.end != 0xFFFF) {
+        if (end.end != 0xFFFF) {
             printf("Packet lost its end.\n\n");
             reject_packet.code = 0xFFF6;
             reject_packet.client_id = rec_buf.client_id;
@@ -161,27 +155,36 @@ int main(void) {
             reject_packet.client_id = rec_buf.client_id;
             reject_packet.segment_no = rec_buf.segment_no;
             memcpy(recive_buffer, &reject_packet, sizeof(reject_packet));
-        } else if (pre_segment_no + 1 != rec_buf.segment_no) {
+        } else if (packet_num + 1 != rec_buf.segment_no) {
             printf("Packet is out of sequence.\n\n");
             reject_packet.code = 0xFFF4;
             reject_packet.client_id = rec_buf.client_id;
             reject_packet.segment_no = rec_buf.segment_no;
             memcpy(recive_buffer, &reject_packet, sizeof(reject_packet));
+        } else if (rec_buf.length != strlen(payload)) {
+            printf("Packet has a wrong payload length.\n\n");
+            reject_packet.code = 0xFFF5;
+            reject_packet.client_id = rec_buf.client_id;
+            reject_packet.segment_no = rec_buf.segment_no;
+            memcpy(recive_buffer, &reject_packet, sizeof(reject_packet));
         } else {
-            rec_buf.type = 0xFFF2;
+            rec_buf.packet_type = 0xFFF2;
             memcpy(recive_buffer, &rec_buf, sizeof(rec_buf) - 1);
             end.end = 0xFFFF;
             memcpy(recive_buffer + sizeof(rec_buf), &end, 2);
             printf("Correct packet..\n\n");
         }
-
-
+        
+        //save the pre receiving segment number
+        pre_segment_no = rec_buf.segment_no;
+        
         if (sendto(sockfd, recive_buffer, sizeof(rec_buf) + 1, 0, (struct sockaddr *) &their_addr, addr_len) == -1) {
-            perror("ack send error!\n");
+            perror("Failed to send!\n");
             exit(1);
         }
+        
     }
-
+    
     close(sockfd);
     return 0;
 }
