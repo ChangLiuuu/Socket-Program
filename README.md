@@ -1,5 +1,5 @@
-# Socket-Program (UDP)
-client sends 5 packets to server: the first one is normal pocket and other four pockets have different errors.
+<h1># Socket-Program (UDP)</h1>
+<p>client sends 5 packets to server: the first one is normal pocket and other four pockets have different errors.
 
 server check each five packet and show details of data packet: 
 
@@ -18,7 +18,7 @@ Payload: "Hello"
 Packet Ending  "0XFFFF"
 Packet is out of sequence.
 
-then server sends back ACK pocket or different REJECT pockets with different reject sub codes.
+then server sends back ACK pocket or different REJECT pockets with different reject sub codes.</p>
 
 <h2>timeout test:</h2> 
 When sending first packet, do not start the server. The client will start to wait for server's response for 3 seconds. if server has no response after 3 secs, client resend packet again. After 3 times of no responses, client exits:
@@ -70,7 +70,7 @@ This is a duplicated pocket.
 From receving packet's type: "0XFFF3"
 Reject Error: Duplicate packet. 0XFFF7 
 
-Socket programming II (UDP)
+<h1>Socket programming II (UDP)</h1>
 
 client sends three subscriber numbers to server. 
 
