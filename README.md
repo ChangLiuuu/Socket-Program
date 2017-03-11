@@ -87,7 +87,7 @@ When sending first packet, do not start the server. The client will start to wai
 
 <h2>test cases showed at client</h2>
 
-<font color = "red">1. Send subscriber number: 408-555-5555 (4G) Not exist.</front> <br>
+<font color = "red">1. Send subscriber number: 408-555-5555 (4G) Not exist.<front> <br>
 Reject: Subscriber does not exist on database - 0XFFFA <br>
 
 2. Send subscriber number: 408-554-6805 (4G) Paid<br>
@@ -99,16 +99,16 @@ Reject: Subscriber has not paid - 0XFFF9 <br>
 
 <h2>test cases showed at server</h2>
 
-listener: waiting to recvfrom...
-The subscriber number is 4085555555 
-Subscriber does not exist in database. 
+listener: waiting to recvfrom...<br>
+The subscriber number is 4085555555 <br>
+Subscriber does not exist in database. <br>
 
-The subscriber number is 4085546805 
-Subscriber technology is  4G 
-Subscriber can access the network! 
+The subscriber number is 4085546805<br> 
+Subscriber technology is  4G <br>
+Subscriber can access the network! <br>
 
-The subscriber number is 4086668821 
-Subscriber technology is  3G 
-Subscriber has not paid! 
+The subscriber number is 4086668821 <br>
+Subscriber technology is  3G <br>
+Subscriber has not paid! <br>
 
 
