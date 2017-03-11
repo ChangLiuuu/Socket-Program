@@ -20,7 +20,7 @@ Packet is out of sequence.<br>
 
 then server sends back ACK pocket or different REJECT pockets with different reject sub codes.<br>
 
-<h2>timeout test:</h2> 
+<h2>Timeout test:</h2> 
 When sending first packet, do not start the server. The client will start to wait for server's response for 3 seconds. if server has no response after 3 secs, client resend packet again. After 3 times of no responses, client exits:
 
 Enter your payload:<br>
@@ -31,7 +31,7 @@ Packet 1 . No response 2 time<br>
 Packet 1 . No response 3 time<br>
 No server response.<br>
 	
-<h2>five packets' test cases</h2>
+<h2>Five packets' test cases:</h2>
 
 The first packet client sent is a normal packet without error, and server sends back ACK packtype: 0XFFF2. The other four packets with different errors and server send back corresponding REJECT sub code:
 
@@ -82,10 +82,10 @@ Not paid: 0XFFF9<br>
 If users have paid, they can access to network.<br>
 Access_OK: 0XFFFB<br>
 
-<h2>timeout test:</h2> 
+<h2>Timeout test:</h2> 
 When sending first packet, do not start the server. The client will start to wait for server's response for 3 seconds. if<br> server has no response after 3 secs, client resend packet again. After 3 times of no responses, client exits.<br>
 
-<h2>test cases showed at client</h2>
+<h2>Test cases showed at client:</h2>
 
 <font color = "red">1. Send subscriber number: 408-555-5555 (4G) Not exist.<front> <br>
 Reject: Subscriber does not exist on database - 0XFFFA <br>
@@ -97,7 +97,7 @@ The technology type is 4G <br>
 3. Send subscriber number: 408-666-8821 (3G) Not paid<br>
 Reject: Subscriber has not paid - 0XFFF9 <br>
 
-<h2>test cases showed at server</h2>
+<h2>Test cases showed at server:</h2>
 
 listener: waiting to recvfrom...<br>
 The subscriber number is 4085555555 <br>
