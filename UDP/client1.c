@@ -1,7 +1,9 @@
-
-// Created by Chang Liu on 2/23/17.
-
-//client.c
+//
+//  client1.c
+//
+//  Created by Chang Liu on 2/20/17.
+//  Copyright © 2017 Chang Liu. All rights reserved.
+//
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +26,6 @@
 
 //The first 7 bytes of the packet
 struct packet {
-    
     unsigned short int start;
     unsigned short int client_id:8;
     unsigned short int type;
@@ -104,7 +105,6 @@ int main() {
     
     if (p == NULL) {
         fprintf(stderr, "talker: failed to create socket\n");
-        
         return 2;
     }
     
@@ -152,16 +152,16 @@ int main() {
             memcpy(&rej_packet, recieving, sizeof(rej_packet));
             
             if (rej_packet.code == 0xFFF4)
-                printf("Reject Error: Packet out of sequence. %#X \n\n", rej_packet.code);
+                printf("Reject: Packet out of sequence. %#X \n\n", rej_packet.code);
             
             else if (rej_packet.code == 0xFFF5)
-                printf("Reject Error: Packet length does not match. %#X \n\n", rej_packet.code);
+                printf("Reject: Packet length does not match. %#X \n\n", rej_packet.code);
             
             else if (rej_packet.code == 0xFFF6)
-                printf("Reject Error: End of packet lost. %#X \n\n", rej_packet.code);
+                printf("Reject: End of packet lost. %#X \n\n", rej_packet.code);
             
             else if (rej_packet.code == 0xFFF7)
-                printf("Reject Error: Duplicate packet. %#X \n\n", rej_packet.code);
+                printf("Reject: Duplicate packet. %#X \n\n", rej_packet.code);
             
         }
         
@@ -200,7 +200,7 @@ void send_error1() {
 void send_error2() {
     printf("This is a wrong payload length pocket!\n");
     send_buf.segment_no = 3;
-    send_buf.length = 0xFFF3;
+    send_buf.length = 0;
     memset(buffer, 0, BUF_SIZE);
     memcpy(buffer, &send_buf, sizeof(send_buf));
     memcpy(buffer + sizeof(send_buf), payload, strlen(payload));

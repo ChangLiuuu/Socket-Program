@@ -1,7 +1,9 @@
-
-// Created by Chang Liu on 2/23/17.
-
-//client.c
+//
+//  server1.c
+//
+//  Created by Chang Liu on 2/20/17.
+//  Copyright © 2017 Chang Liu. All rights reserved.
+//
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -136,8 +138,8 @@ int main(void) {
         printf("segment number \"%d\"\n", rec_buf.segment_no);
         printf("expected segment number \"%d\"\n", packet_num + 1);
         printf("pre segment number \"%d\"\n", pre_segment_no);
-        printf("length of payload \"%lu\"\n", rec_buf.length);
-        printf("expected length of payload \"%hu\"\n", strlen(payload));
+        printf("length of payload \"%hu\"\n", rec_buf.length);
+        printf("expected length of payload \"%lu\"\n", strlen(payload));
         printf("Payload: \"%s\"\n", payload);
         printf("Packet Ending  \"%#X\"\n", end.end);
         

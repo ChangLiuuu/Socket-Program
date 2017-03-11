@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
         sendto(sockfd, buffer, sizeof(send_buf), 0, p->ai_addr, p->ai_addrlen);
         
         //the client will resent 3 times if the timer is timeout
-        rv = (intrecvfrom(sockfd, rec_buf, SIZE - 1, MSG_WAITALL, p->ai_addr, &p->ai_addrlen));
+        rv = recvfrom(sockfd, rec_buf, SIZE - 1, MSG_WAITALL, p->ai_addr, &p->ai_addrlen);
         count = 0;
         while (rv == -1) {
             if (count == 3) {
